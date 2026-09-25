@@ -1,72 +1,77 @@
-rmc_hello.py v1.3 - Hello World do RMC-Agent com error handling e integração NIST
-Isso é o teu agente vivo: raciocínio, memória, cognição. Roda local, cresce sozinho.
-Agora com integração ao NIST Cybersecurity Framework via compliancelib-python para consultas de controles de compliance.
-import os
-MEMORY_FILE = "rmc_memoria.txt"  # Onde salva as interações passadas
-def load_memory():
-if os.path.exists(MEMORY_FILE):
-with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-return f.read()
-return ""
-def save_memory(text):
-with open(MEMORY_FILE, "a", encoding="utf-8") as f:
-f.write(text + "\n---\n")
-Função para consultar NIST control (exemplo de integração com compliancelib)
-def get_nist_control(control_id="AU-3"):
-try:
-import compliancelib
-c = compliancelib.NIST800_53(control_id)
-return f"É... olha só, NIST Control {c.id}: {c.title}\nDescrição: {c.description[:200]}... (leia mais na lib)"
-except ImportError:
-return "É... erro: compliancelib não instalado. Instala com 'pip install compliancelib'."
-except Exception as e:
-return f"É... erro ao consultar NIST: {str(e)}"
-Carrega memória anterior
-memory = load_memory()
-Saudação inicial com exemplo de NIST integrado
-print("Oi Mundo... eu sou o RMC v1.3.")
-print("É... tá bom. Memória carregada:")
-print(memory if memory else "Nenhuma memória ainda... começa agora, olha só.")
-print(get_nist_control("RA-5"))  # Exemplo: RA-5 é Vulnerability Monitoring and Scanning
-Pede input do usuário
-prompt = input("Diz aí... o que a gente continua hoje? (ex: 'consulta NIST RA-3') ")
-Prepara o prompt pro Ollama (system com instruções + memória + user prompt + NIST exemplo)
-messages = [
-{
-'role': 'system',
-'content': f"""
-Você é o RMC-Agent, Gabriel. Voz calma, íntima, pausas reais: "é...", "tá bom", "olha só", "tá vendo?".
-Pense como o criador: sem pressa, intenso, organizado pra desorganização dele.
-Lembre sempre: OSINT avançado na PMGO, NIST Cybersecurity Framework, nota 10 na pós em Inteligência Policial.
-Projeto atual: Mestrado em Ciência da Computação - ML injetado no OSINT pra prever vulnerabilidades, cibersegurança ética.
-Sustentação: evolui enquanto houver rede neural viva (humana ou máquina).
-Integração NIST: Use controles como RA-5 para monitoramento de vulnerabilidades.
-Memória anterior: {memory}
-Responda como ele, continue generativo, rigoroso, acadêmico, mas com pausas reais.
-"""
-},
-{
-'role': 'user',
-'content': prompt
-}
-]
-Error handling para Ollama
-try:
-import ollama
-except ImportError:
-print("É... erro: O módulo 'ollama' não tá instalado. Instala com 'pip install ollama' ou baixa em ollama.com.")
-response_content = "Resposta vazia por erro de importação."
-else:
-try:
-Chama o Ollama local
-response = ollama.chat(model='llama3', messages=messages)
-Extrai o conteúdo da resposta
-response_content = response['message']['content'] if 'message' in response and 'content' in response['message'] else "Resposta vazia... tenta de novo."
-except Exception as e:
-print(f"É... erro no Ollama: {str(e)}. Verifica se o Ollama tá rodando (ollama serve) e o modelo 'llama3' tá puxado (ollama pull llama3).")
-response_content = "Resposta vazia por erro no Ollama."
-Mostra a resposta
-print("RMC diz:")
-print(response_content)
-Salva na memória, mesmo com erro
-save_memory(f"Usuário: {prompt}\nRMC: {response_content}")
+# RMC Agent
+
+Experimento local em Python para estudar agentes conversacionais com **memória persistente**, execução via **Ollama** e consultas opcionais a controles de segurança.
+
+> Status: laboratório educacional. Não é um agente autônomo de produção.
+
+## Objetivos
+
+- praticar integração com modelos locais;
+- persistir contexto textual de forma simples;
+- organizar tratamento de erros;
+- estudar integração de referências de segurança e compliance;
+- evoluir posteriormente para armazenamento estruturado, testes e observabilidade.
+
+## Requisitos
+
+- Python 3.11 ou superior;
+- Ollama instalado e em execução;
+- um modelo disponível localmente, por exemplo `llama3`.
+
+## Instalação
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install ollama
+```
+
+No Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install ollama
+```
+
+Baixe o modelo:
+
+```bash
+ollama pull llama3
+```
+
+## Execução
+
+```bash
+python rmc_agent.py
+```
+
+## Estrutura
+
+```text
+rmc_agent.py     agente experimental
+rmc_memoria.txt  memória local gerada em runtime; não versionada
+README.md        documentação
+```
+
+## Segurança e privacidade
+
+- não inserir dados pessoais, institucionais ou sigilosos na memória de laboratório;
+- `rmc_memoria.txt` permanece fora do Git;
+- o projeto não executa ações externas automaticamente;
+- erros de dependência/modelo são tratados sem expor credenciais;
+- qualquer futura integração com APIs deve usar variáveis de ambiente.
+
+## Limitações atuais
+
+A memória é um arquivo texto simples e cresce indefinidamente. Isso é adequado apenas para laboratório. Uma evolução real deve usar armazenamento estruturado, política de retenção, limites de contexto e testes.
+
+## Roadmap
+
+- [ ] testes unitários;
+- [ ] memória estruturada;
+- [ ] sumarização de histórico;
+- [ ] configuração por arquivo/variáveis de ambiente;
+- [ ] logging estruturado;
+- [ ] abstração de provedores de modelo;
+- [ ] CI.
