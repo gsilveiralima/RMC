@@ -23,7 +23,7 @@ Experimento local em Python para estudar agentes conversacionais com **memória 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install ollama
+pip install -r requirements.txt
 ```
 
 No Windows PowerShell:
@@ -68,10 +68,10 @@ A memória é um arquivo texto simples e cresce indefinidamente. Isso é adequad
 
 ## Roadmap
 
-- [ ] testes unitários;
+- [x] testes unitários para persistência local;
 - [ ] memória estruturada;
 - [ ] sumarização de histórico;
 - [ ] configuração por arquivo/variáveis de ambiente;
 - [ ] logging estruturado;
 - [ ] abstração de provedores de modelo;
-- [ ] CI.
+- [x] CI de sintaxe e testes locais.
